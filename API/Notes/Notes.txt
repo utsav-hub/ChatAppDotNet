@@ -11,3 +11,5 @@ Now Run command
 dotnet ef migrations add InitialCreate -o Data/Migrations
 It will create migration file in the defined location and then
 dotnet ef database update
+
+-- git ignore

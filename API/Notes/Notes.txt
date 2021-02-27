@@ -1,0 +1,13 @@
+First Add all packages from nuget gallery
+- Entity Framework Core SQL Server
+- Enntity Framework Core.Design
+Download entity framework from nuget gallery with the version you have installed in vscode through nuget gallery packages
+-- open nuget.org
+-- search for "dotnet-ef" 
+-- Select proper package and copy that CLI like 
+"dotnet tool install --global dotnet-ef --version 5.0.3"
+
+Now Run command
+dotnet ef migrations add InitialCreate -o Data/Migrations
+It will create migration file in the defined location and then
+dotnet ef database update

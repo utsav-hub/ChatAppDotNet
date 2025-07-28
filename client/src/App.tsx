@@ -40,8 +40,10 @@ function App() {
   }, [userId]);
 
   const handleMetricAdded = async () => {
+    console.log('handleMetricAdded called - refreshing health data');
     try {
       const data = await healthAPI.getHealthData(userId);
+      console.log('New health data received:', data);
       setHealthData(data.map(item => ({
         ...item,
         timestamp: new Date(item.timestamp)
@@ -286,9 +288,9 @@ const HomePage: React.FC<HomePageProps> = ({ userId, sessionId, healthData, onMe
                       <td className="p-2 font-medium capitalize">
                         {metric.type.replace('_', ' ')}
                       </td>
-                      <td className="p-2">
-                        {metric.value} {metric.unit}
-                      </td>
+                      {/* <td className="p-2">
+                        ({String(metric.value)}) ({String(metric.unit)})
+                      </td> */}
                       <td className="p-2 text-gray-600">
                         {new Date(metric.timestamp).toLocaleDateString()}
                       </td>

@@ -13,7 +13,11 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+origin: 'http://localhost:3000', // Your React app URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true // if you send cookies or auth headers
+}));
 app.use(express.json());
 app.use(morgan('combined'));
 
@@ -34,12 +38,14 @@ const healthMetricSchema = Joi.object({
   ).required(),
   unit: Joi.string().required(),
   timestamp: Joi.date().default(Date.now),
-  notes: Joi.string().optional()
+  notes: Joi.string().optional(),
+  userId: Joi.string().optional()
 });
 
 const chatMessageSchema = Joi.object({
   message: Joi.string().required(),
-  sessionId: Joi.string().optional()
+  sessionId: Joi.string().optional(),
+  userId: Joi.string().optional()
 });
 
 // Health chatbot logic
@@ -181,12 +187,16 @@ app.get('/api/health/data/:userId?', (req, res) => {
 // Add health metric
 app.post('/api/health/data', (req, res) => {
   try {
+    console.log('Received health metric request:', req.body);
     const { error, value } = healthMetricSchema.validate(req.body);
     if (error) {
+      console.log('Validation error:', error.details[0].message);
       return res.status(400).json({ error: error.details[0].message });
     }
 
-    const userId = req.body.userId || 'default';
+    const { userId = 'default' } = value;
+    console.log('Processing for userId:', userId);
+    
     const healthMetric = {
       id: uuidv4(),
       ...value,
@@ -198,26 +208,29 @@ app.post('/api/health/data', (req, res) => {
     }
     
     healthData.get(userId).push(healthMetric);
+    console.log('Health metric added successfully:', healthMetric);
     
     res.status(201).json({
       message: 'Health metric recorded successfully',
       data: healthMetric
     });
   } catch (error) {
+    console.error('Server error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 // Chat endpoint
+
 app.post('/api/chat', (req, res) => {
   try {
+    
     const { error, value } = chatMessageSchema.validate(req.body);
     if (error) {
       return res.status(400).json({ error: error.details[0].message });
     }
 
-    const { message, sessionId = 'default' } = value;
-    const userId = req.body.userId || 'default';
+    const { message, sessionId = 'default', userId = 'default' } = value;
     
     // Get user's health data for context
     const userData = healthData.get(userId) || [];

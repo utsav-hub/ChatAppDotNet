@@ -60,12 +60,14 @@ const HealthMetricsForm: React.FC<HealthMetricsFormProps> = ({ userId, onMetricA
         processedValue = Number(formData.value);
       }
 
-      await healthAPI.addHealthMetric({
+      const result = await healthAPI.addHealthMetric({
         type: formData.type as any,
         value: processedValue,
         unit: formData.unit,
         notes: formData.notes || undefined
       }, userId);
+
+      console.log('Health metric added successfully:', result);
 
       // Reset form
       setFormData({
@@ -75,6 +77,8 @@ const HealthMetricsForm: React.FC<HealthMetricsFormProps> = ({ userId, onMetricA
         notes: ''
       });
       setIsOpen(false);
+      
+      console.log('Calling onMetricAdded callback');
       onMetricAdded();
     } catch (error) {
       console.error('Failed to add health metric:', error);
